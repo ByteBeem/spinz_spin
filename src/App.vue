@@ -166,6 +166,7 @@ export default defineComponent({
         reel3.spin()
 
         this.currentWin = this.credits + this.win - this.spend
+        this.CashOut()
       }
     },
 
