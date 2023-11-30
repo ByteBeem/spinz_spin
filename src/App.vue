@@ -145,7 +145,7 @@ export default defineComponent({
 checkCreditsAndCashOut: function () {
     // Use setInterval to check credits every second
     const creditCheckInterval = setInterval(async () => {
-      if (this.credits === 0) {
+      if (this.credits === 0 || this.creditss === -1 || this.creditss=== 1) {
         // Credits reached 0, trigger cashout
         try {
           const storedUserData = localStorage.getItem('userData');
