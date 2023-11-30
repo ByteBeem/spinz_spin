@@ -54,7 +54,7 @@ export const cashSymbolData = [
   },
   {
     name: '1Cash',
-    value: 15,
+    value: 8,
     number: 1,
     image: '/symbol-images/Dollars-512.webp'
   }

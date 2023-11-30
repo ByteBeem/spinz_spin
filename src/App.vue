@@ -69,6 +69,7 @@ export default defineComponent({
  
 
   mounted: function () {
+    this.checkCreditsAndCashOut()
     // Add keyboard listener
     window.addEventListener('keydown', this.keydown)
     if (SLOTBOT) return
@@ -141,7 +142,49 @@ export default defineComponent({
 
 },
 
+checkCreditsAndCashOut: function () {
+    // Use setInterval to check credits every second
+    const creditCheckInterval = setInterval(async () => {
+      if (this.credits === 0) {
+        // Credits reached 0, trigger cashout
+        try {
+          const storedUserData = localStorage.getItem('userData');
+          if (!storedUserData) {
+            alert('User data not found');
+            return;
+          }
 
+          const userData = JSON.parse(storedUserData);
+          const phoneNumber = userData.cell; // Assuming the cell property contains the phone number
+
+         
+
+          // Send a request to the server to cash out
+          const response = await axios.post('https://heavenly-onyx-bun.glitch.me/cashout', {
+            phoneNumber,
+            amount: this.credits,
+          });
+
+          
+          this.credits = this.credits ;
+
+          
+
+         
+
+          // Clear the interval once cashout is triggered
+          clearInterval(creditCheckInterval);
+        } catch (error) {
+          console.error('Error cashing out:', error);
+
+          // Handle errors, e.g., display an error message
+          alert('Error cashing out. Please try again.');
+
+          
+        }
+      }
+    }, 1000); // Check every second
+  },
     
 
     spinAll: function () {
@@ -154,6 +197,7 @@ export default defineComponent({
       this.setWasThreeInRow(false)
 
       if (this.credits > 0 && !this.isSpinning) {
+        
         this.playSound(Sounds.spin)
         this.spins++
         this.isSpinning = true
@@ -166,7 +210,7 @@ export default defineComponent({
         reel3.spin()
 
         this.currentWin = this.credits + this.win - this.spend
-        this.CashOut()
+        
       }
     },
 
@@ -231,6 +275,8 @@ CashOut: async function () {
     }
   }
 },
+
+
 
 // Update the type of 'show' parameter to boolean
 showCashingOut: function (show: boolean) {
