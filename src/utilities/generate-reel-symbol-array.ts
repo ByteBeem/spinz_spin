@@ -18,7 +18,7 @@ export const generateReelSymbolArray = (): ReelSymbol[] => {
       occurrenceCount = 1;
     } else {
       // Increase the occurrence count for higher-value symbols to make them rarer
-      occurrenceCount = i * 2;
+      occurrenceCount = i * 3; // Increase this multiplier to make them even rarer
     }
 
     // Uncomment the following line if you want to override count for a specific symbol
@@ -32,7 +32,7 @@ export const generateReelSymbolArray = (): ReelSymbol[] => {
   });
 
   // Perform multiple rounds of shuffling
-  const numRounds = 15; // Adjust the number of rounds based on desired difficulty
+  const numRounds = 20; // Adjust the number of rounds based on desired difficulty
   let shuffledArray = sortedSymbolData.slice(); // Initial clone
 
   for (let round = 0; round < numRounds; round++) {
