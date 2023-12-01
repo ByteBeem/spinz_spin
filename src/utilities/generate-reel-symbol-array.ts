@@ -1,51 +1,57 @@
-import type { ReelSymbol } from '@/typings'
-import { symbolData } from '../symbol-data'
+import type { ReelSymbol } from '@/typings';
+import { symbolData } from '../symbol-data';
 
+/**
+ * Generates a shuffled array of ReelSymbol objects.
+ * @returns Shuffled array of ReelSymbol objects.
+ */
 export const generateReelSymbolArray = (): ReelSymbol[] => {
-  const sortedSymbolData = [] as ReelSymbol[]
+  const sortedSymbolData = [] as ReelSymbol[];
 
-  /**
-   * Method 1, random until desired tile count is reached.
-   */
-  // let count = 50
-  // while (count > 0) {
-  //   const symbolIndex = Math.floor(Math.random() * symbolData.length)
-  //   const symbolObject = symbolData[symbolIndex]
-  //   frs.push(symbolObject)
-  //   count--
-  // }
+  // Sort symbols based on value
+  symbolData.sort((a, b) => b.value - a.value);
 
-  /**
-   * Method 2
-   * - Sort the source items on value
-   * - Then use their index to determine their count in the reel
-   * - And shuffle
-   */
-  symbolData.sort((a, b) => b.value - a.value)
+  // Calculate occurrence count for each symbol
   symbolData.forEach((sd, i) => {
-    let occurenceCount
-    if (i === 0) occurenceCount = 1
-    else if (i === 1) occurenceCount = 1
-    else occurenceCount = i
-    // You could overwride a value/index based occurence like this:
-    // if (sd.name === 'Crown') occurenceCount += 20
-    while (occurenceCount > 0) {
-      sortedSymbolData.push(sd)
-      occurenceCount--
+    let occurrenceCount;
+    if (i === 0 || i === 1) {
+      occurrenceCount = 1;
+    } else {
+      occurrenceCount = i;
     }
-  })
+    // Uncomment the following line if you want to override count for a specific symbol
+    if (sd.name === '1Cash') occurrenceCount += 20;
 
-  // Fisher-Yates algorithm
-  const shuffleArray = (array: ReelSymbol[]) => {
-    const a = [...array] // Clone
-    for (let i = array.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1))
-      const temp = a[i]
-      a[i] = a[j]
-      a[j] = temp
+    // Add symbols to the sorted array based on occurrence count
+    while (occurrenceCount > 0) {
+      sortedSymbolData.push(sd);
+      occurrenceCount--;
     }
-    return a
+  });
+
+  // Perform multiple rounds of shuffling
+  const numRounds = 10; // Adjust the number of rounds based on desired difficulty
+  let shuffledArray = sortedSymbolData.slice(); // Initial clone
+
+  for (let round = 0; round < numRounds; round++) {
+    shuffledArray = shuffleArray(shuffledArray);
   }
 
-  return shuffleArray(sortedSymbolData)
-}
+  return shuffledArray;
+};
+
+/**
+ * Shuffles the input array using the Fisher-Yates algorithm.
+ * @param array - Array to be shuffled.
+ * @returns Shuffled array.
+ */
+const shuffleArray = (array: ReelSymbol[]): ReelSymbol[] => {
+  const clonedArray = [...array]; // Clone
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    const temp = clonedArray[i];
+    clonedArray[i] = clonedArray[j];
+    clonedArray[j] = temp;
+  }
+  return clonedArray;
+};
