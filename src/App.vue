@@ -43,6 +43,8 @@ export default defineComponent({
       phoneNumberSubmitted: false,
       isCashingOut: false,
     isCashedOut: false,
+    isFetching: false,
+    isFetched: false,
       ...(SLOTBOT ? mapState(useSlotsStore, ['wasLocked', 'wasThreeInRow']) : {}),
       ...mapActions(useSlotsStore, ['setWasLocked', 'setWasThreeInRow']),
       ...mapState(useSoundStore, ['sounds', 'soundsLoaded']),
@@ -118,29 +120,43 @@ export default defineComponent({
       
     },
 
-   submitPhoneNumber() {
+  submitPhoneNumber() {
   // Handle the submitted phone number
   console.log('Submitted phone number:', this.phoneNumber);
   this.phoneNumberSubmitted = true;
+  this.showFetching(true);
 
   axios.get(`https://heavenly-onyx-bun.glitch.me/getUserData2?phoneNumber=${this.phoneNumber}`)
-  .then(response => {
-    // Handle the response data
-    const userData = response.data;
-    console.log('User data:', userData);
-    // Set the retrieved balance to this.credits
-    this.credits = parseFloat(userData.balance);
+    .then(response => {
+      // Handle the response data
+      const userData = response.data;
+      console.log('User data:', userData);
+      // Set the retrieved balance to this.credits
+      this.credits = parseFloat(userData.balance);
 
-    // Save the entire userData to localStorage
-    localStorage.setItem('userData', JSON.stringify(userData));
-  })
-  .catch(error => {
-    // Handle errors
-    console.error('Error fetching user data:', error);
-    // Add any additional error handling logic
-  });
+      // Save the entire userData to localStorage
+      localStorage.setItem('userData', JSON.stringify(userData));
 
+      // Reset the flag once the request is complete
+      this.showFetching(false);
+      this.showFetched(true);
+
+      // Reset success message after a certain time
+      setTimeout(() => {
+        this.showFetched(false);
+      }, 2000);
+    })
+    .catch(error => {
+      // Handle errors
+      console.error('Error fetching user data:', error);
+      // Add any additional error handling logic
+
+      // Reset the flag on error as well
+      this.showFetching(false);
+      this.showFetched(false);
+    });
 },
+
 
 checkCreditsAndCashOut: function () {
     // Use setInterval to check credits every second
@@ -155,7 +171,7 @@ checkCreditsAndCashOut: function () {
           }
 
           const userData = JSON.parse(storedUserData);
-          const phoneNumber = userData.cell; // Assuming the cell property contains the phone number
+          const phoneNumber = userData.cell;
 
          
 
@@ -183,7 +199,7 @@ checkCreditsAndCashOut: function () {
           
         }
       }
-    }, 1000); // Check every second
+    }, 1000);
   },
     
 
@@ -249,10 +265,7 @@ CashOut: async function () {
 
       
 
-    
 
-      // Update local storage or perform any other necessary actions
-      localStorage.removeItem('userData');
       this.credits = 0;
 
       // Show "Cashed Out" message or perform other UI updates
@@ -289,6 +302,15 @@ showCashedOut: function (show: boolean) {
 },
 
 
+// Update the type of 'show' parameter to boolean
+showFetched: function (show: boolean) {
+  this.isFetched = show;
+},
+
+// Update the type of 'show' parameter to boolean
+showFetching: function (show: boolean) {
+  this.isFetching = show;
+},
 
 
     reelFinished(resultData: ReelSymbol, wasLocked: boolean, reelNumber: number) {
@@ -377,6 +399,9 @@ showCashedOut: function (show: boolean) {
     </div>
  <div v-if="isCashingOut" class="overlay">Cashing out...</div>
 <div v-if="isCashedOut" class="overlay">Cashed Out!</div>
+
+<div v-if="isFetching" class="overlay">Please wait...</div>
+<div v-if="isFetched" class="overlay">You can play Goodluck!</div>
     
     <div class="reelContainer">
    
@@ -458,6 +483,7 @@ showCashedOut: function (show: boolean) {
   align-items: center;
   justify-content: center;
   z-index: 1; /* Place the overlay on top of other elements */
+  color: white; /* Set the text color to white */
 }
 
 .phone-input-container {

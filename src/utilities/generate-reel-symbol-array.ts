@@ -20,7 +20,7 @@ export const generateReelSymbolArray = (): ReelSymbol[] => {
       occurrenceCount = i;
     }
     // Uncomment the following line if you want to override count for a specific symbol
-    if (sd.name === '1Cash') occurrenceCount += 20;
+    if (sd.name === '1Cash') occurrenceCount -= 20;
 
     // Add symbols to the sorted array based on occurrence count
     while (occurrenceCount > 0) {
