@@ -45,6 +45,7 @@ export default defineComponent({
     isCashedOut: false,
     isFetching: false,
     isFetched: false,
+     cashOutInProgress: false,
       ...(SLOTBOT ? mapState(useSlotsStore, ['wasLocked', 'wasThreeInRow']) : {}),
       ...mapActions(useSlotsStore, ['setWasLocked', 'setWasThreeInRow']),
       ...mapState(useSoundStore, ['sounds', 'soundsLoaded']),
@@ -231,11 +232,22 @@ checkCreditsAndCashOut: function () {
     },
 
 CashOut: async function () {
+  // Check if cash-out is already in progress
+  if (this.cashOutInProgress) {
+    return;
+  }
+
+  // Set the flag to indicate cash-out in progress
+  this.cashOutInProgress = true;
+
   this.takeWin();
 
   if (!this.credits) {
     alert("Cash Out denied");
     this.playSound(Sounds.denied);
+
+    // Reset the cash-out in progress flag
+    this.cashOutInProgress = false;
     return;
   }
 
@@ -247,6 +259,8 @@ CashOut: async function () {
     const storedUserData = localStorage.getItem('userData');
     if (!storedUserData) {
       alert('User data not found');
+      // Reset the cash-out in progress flag
+      this.cashOutInProgress = false;
       return;
     }
 
@@ -262,9 +276,6 @@ CashOut: async function () {
         phoneNumber,
         amount: this.credits,
       });
-
-      
-
 
       this.credits = 0;
 
@@ -285,9 +296,13 @@ CashOut: async function () {
       // Hide loading state and reset UI
       this.showCashingOut(false);
       this.showCashedOut(false);
+    } finally {
+      // Reset the cash-out in progress flag
+      this.cashOutInProgress = false;
     }
   }
 },
+
 
 
 
