@@ -89,7 +89,7 @@ this.socket.on('message', (data: MessageType) => {
 
 
 
-  this.checkCreditsAndCashOut();
+  
 
   // Add keyboard listener
   window.addEventListener('keydown', this.keydown);
@@ -178,50 +178,6 @@ this.socket.on('message', (data: MessageType) => {
     });
 },
 
-
-checkCreditsAndCashOut: function () {
-    // Use setInterval to check credits every second
-    const creditCheckInterval = setInterval(async () => {
-      if (this.credits === 0 || this.credits === -1 || this.credits === 1) {
-        // Credits reached 0, trigger cashout
-        try {
-          const storedUserData = localStorage.getItem('userData');
-          if (!storedUserData) {
-            alert('User data not found');
-            return;
-          }
-
-          const userData = JSON.parse(storedUserData);
-          const phoneNumber = userData.cell;
-
-         
-
-          // Send a request to the server to cash out
-          const response = await axios.post('https://heavenly-onyx-bun.glitch.me/cashout', {
-            phoneNumber,
-            amount: this.credits,
-          });
-
-          
-          this.credits = this.credits ;
-
-          
-
-         
-
-          // Clear the interval once cashout is triggered
-          clearInterval(creditCheckInterval);
-        } catch (error) {
-          console.error('Error cashing out:', error);
-
-          // Handle errors, e.g., display an error message
-          alert('Error cashing out. Please try again.');
-
-          
-        }
-      }
-    }, 1000);
-  },
     
 
     spinAll: function () {
