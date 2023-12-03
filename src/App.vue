@@ -2,6 +2,7 @@
 import { defineComponent } from 'vue'
 import { mapActions, mapState } from 'pinia'
 import axios from 'axios'
+import { io } from 'socket.io-client';
 
 import SlotReel from '@/components/SlotReel.vue'
 import WinLegend from '@/components/WinLegend.vue'
@@ -40,6 +41,7 @@ export default defineComponent({
   data: function () {
     return {
     phoneNumber: '',
+    socket: null as any,
       phoneNumberSubmitted: false,
       isCashingOut: false,
     isCashedOut: false,
@@ -70,24 +72,42 @@ export default defineComponent({
   },
 
  
+mounted: function () {
+  // Assuming your server is running locally on port 3000
+// Connect to the server
+// Define a type for the message
+type MessageType = string;
 
-  mounted: function () {
-    this.checkCreditsAndCashOut()
-    // Add keyboard listener
-    window.addEventListener('keydown', this.keydown)
-    if (SLOTBOT) return
-    const storedUserData = localStorage.getItem('userData');
+// Connect to the server
+this.socket = io('https://rounded-planet-menu.glitch.me/', { path: '/socket.io/' });
+
+// Listen for messages from the server
+this.socket.on('message', (data: MessageType) => {
+  console.log('Received message from server:', data);
+  // Handle the received data as needed
+});
+
+
+
+  this.checkCreditsAndCashOut();
+
+  // Add keyboard listener
+  window.addEventListener('keydown', this.keydown);
+
+  if (SLOTBOT) return;
+
+  const storedUserData = localStorage.getItem('userData');
   if (storedUserData) {
     const userData = JSON.parse(storedUserData);
     this.credits = parseFloat(userData.balance);
-    }
-    if (localStorage.spend) this.spend = parseFloat(localStorage.spend)
-   
-    if (localStorage.spins) this.spins = parseFloat(localStorage.spins)
-    if (localStorage.win) this.win = parseFloat(localStorage.win)
-    if (localStorage.maxWin) this.maxWin = parseFloat(localStorage.maxWin)
-    if (localStorage.currentWin) this.currentWin = parseFloat(localStorage.currentWin)
-  },
+  }
+
+  if (localStorage.spend) this.spend = parseFloat(localStorage.spend);
+  if (localStorage.spins) this.spins = parseFloat(localStorage.spins);
+  if (localStorage.win) this.win = parseFloat(localStorage.win);
+  if (localStorage.maxWin) this.maxWin = parseFloat(localStorage.maxWin);
+  if (localStorage.currentWin) this.currentWin = parseFloat(localStorage.currentWin);
+},
 
   watch: SLOTBOT
     ? {}
@@ -205,31 +225,44 @@ checkCreditsAndCashOut: function () {
     
 
     spinAll: function () {
-      this.takeWin()
-      if (!this.credits) {
-        this.playSound(Sounds.denied)
-        return
-      }
-      this.setWasLocked(false)
-      this.setWasThreeInRow(false)
+  this.takeWin();
+  
+  if (!this.credits) {
+    this.playSound(Sounds.denied);
+    return;
+  }
+  
+  this.setWasLocked(false);
+  this.setWasThreeInRow(false);
 
-      if (this.credits > 0 && !this.isSpinning) {
-        
-        this.playSound(Sounds.spin)
-        this.spins++
-        this.isSpinning = true
-        this.resultData = []
-        this.credits = this.credits - 2
+  if (this.credits > 0 && !this.isSpinning) {
+    this.playSound(Sounds.spin);
+    this.spins++;
+    this.isSpinning = true;
+    this.resultData = [];
+    this.credits = this.credits - 2;
 
-        const { reel1, reel2, reel3 } = this.$refs as ReelRefs
-        reel1.spin()
-        reel2.spin()
-        reel3.spin()
+    const { reel1, reel2, reel3 } = this.$refs as ReelRefs;
+    reel1.spin();
+    reel2.spin();
+    reel3.spin();
 
-        this.currentWin = this.credits + this.win - this.spend
-        
-      }
-    },
+    this.currentWin = this.credits + this.win - this.spend;
+
+    // Get cell from localStorage
+    const storedUserData = localStorage.getItem('userData');
+    if (!storedUserData) {
+      console.error('User data not found');
+      return;
+    }
+    const userData = JSON.parse(storedUserData);
+    const phoneNumber = userData.cell;
+
+    // Emit 'spin' event to the server with current balance
+    this.socket.emit('spin', { phoneNumber, balance: this.credits });
+  }
+},
+
 
 CashOut: async function () {
   // Check if cash-out is already in progress
