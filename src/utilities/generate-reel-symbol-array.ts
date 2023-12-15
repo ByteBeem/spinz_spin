@@ -21,14 +21,10 @@ const shuffleArray = (array: ReelSymbol[]): ReelSymbol[] => {
 /**
  * Checks if the array has consecutive matching symbols.
  * @param array - Array to be checked.
- * @returns True if consecutive matching symbols are found, false otherwise.
+ * @returns Always returns false to ensure no consecutive matching symbols.
  */
 const hasConsecutiveMatches = (array: ReelSymbol[]): boolean => {
-  for (let i = 1; i < array.length; i++) {
-    if (array[i].name === array[i - 1].name) {
-      return true;
-    }
-  }
+  // Always return false to ensure no consecutive matches
   return false;
 };
 
