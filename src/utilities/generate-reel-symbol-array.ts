@@ -44,18 +44,31 @@ export const generateReelSymbolArray = (): ReelSymbol[] => {
 };
 
 /**
- * Applies the Fisher-Yates algorithm to shuffle the input array.
+ * Applies the Fisher-Yates algorithm to shuffle the input array,
+ * ensuring that consecutive matching symbols do not occur.
  * @param array - Array to be shuffled.
  * @returns Shuffled array.
  */
 const shuffleArray = (array: ReelSymbol[]): ReelSymbol[] => {
   const clonedArray = [...array]; // Clone the array
+
   for (let i = array.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
+
     // Swap elements randomly to enhance unpredictability
     const temp = clonedArray[i];
     clonedArray[i] = clonedArray[j];
     clonedArray[j] = temp;
+
+    // Ensure that consecutive symbols are not the same
+    if (i > 0 && clonedArray[i].name === clonedArray[i - 1].name) {
+      // Swap with a non-consecutive element
+      const nonConsecutiveIndex = i - 2 >= 0 ? i - 2 : i + 1;
+      const tempNonConsecutive = clonedArray[i];
+      clonedArray[i] = clonedArray[nonConsecutiveIndex];
+      clonedArray[nonConsecutiveIndex] = tempNonConsecutive;
+    }
   }
+
   return clonedArray;
 };
