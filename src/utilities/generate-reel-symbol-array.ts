@@ -1,4 +1,4 @@
-User
+
 import type { ReelSymbol } from '@/typings';
 import { symbolData } from '../symbol-data';
 
