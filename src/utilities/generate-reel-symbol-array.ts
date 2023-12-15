@@ -33,6 +33,20 @@ const hasConsecutiveMatches = (array: ReelSymbol[]): boolean => {
 };
 
 /**
+ * Checks if the array has higher-value symbol followed by a lower-value symbol.
+ * @param array - Array to be checked.
+ * @returns True if a higher-value symbol is followed by a lower-value symbol, false otherwise.
+ */
+const hasHigherValueFollowedByLower = (array: ReelSymbol[]): boolean => {
+  for (let i = 0; i < array.length - 1; i++) {
+    if (array[i].value > array[i + 1].value) {
+      return true;
+    }
+  }
+  return false;
+};
+
+/**
  * Creates a deliberately challenging array of ReelSymbol objects for players to navigate.
  * @returns Challenging array of ReelSymbol objects.
  */
@@ -64,12 +78,12 @@ export const generateReelSymbolArray = (): ReelSymbol[] => {
 
   let shuffledArray = sortedSymbolData.slice(); // Initial clone
 
-  // Shuffle the array until there are no consecutive matching symbols
+  // Ensure no consecutive matches and the shuffled array always loses
   for (let round = 0; round < 100; round++) {
     shuffledArray = shuffleArray(shuffledArray);
 
-    // If consecutive matches are found, reshuffle
-    if (!hasConsecutiveMatches(shuffledArray)) {
+    // If consecutive matches or higher-value followed by lower-value are found, reshuffle
+    if (!hasConsecutiveMatches(shuffledArray) && !hasHigherValueFollowedByLower(shuffledArray)) {
       break;
     }
   }
