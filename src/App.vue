@@ -147,7 +147,7 @@ this.socket.on('message', (data: MessageType) => {
   this.phoneNumberSubmitted = true;
   this.showFetching(true);
 
-  axios.get(`https://heavenly-onyx-bun.glitch.me/getUserData2?phoneNumber=${this.phoneNumber}`)
+  axios.get(`https://imported-glory-toque.glitch.me/getUserData2?phoneNumber=${this.phoneNumber}`)
     .then(response => {
       // Handle the response data
       const userData = response.data;
