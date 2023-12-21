@@ -79,7 +79,7 @@ mounted: function () {
 type MessageType = string;
 
 // Connect to the server
-this.socket = io('https://rounded-planet-menu.glitch.me/', { path: '/socket.io/' });
+this.socket = io('https://zany-slender-lady.glitch.me/', { path: '/socket.io/' });
 
 // Listen for messages from the server
 this.socket.on('message', (data: MessageType) => {
