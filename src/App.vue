@@ -79,7 +79,7 @@ mounted: function () {
 type MessageType = string;
 
 // Connect to the server
-this.socket = io('https://zany-slender-lady.glitch.me/', { path: '/socket.io/' });
+this.socket = io('https://spinz-servers-17da09bbdb53.herokuapp.com/', { path: '/socket.io/' });
 
 // Listen for messages from the server
 this.socket.on('message', (data: MessageType) => {
@@ -147,7 +147,7 @@ this.socket.on('message', (data: MessageType) => {
   this.phoneNumberSubmitted = true;
   this.showFetching(true);
 
-  axios.get(`https://imported-glory-toque.glitch.me/getUserData2?phoneNumber=${this.phoneNumber}`)
+  axios.get(`https://spinz-servers-17da09bbdb53.herokuapp.com/getUserData2?phoneNumber=${this.phoneNumber}`)
     .then(response => {
       // Handle the response data
       const userData = response.data;
