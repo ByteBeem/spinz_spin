@@ -73,9 +73,15 @@ export default defineComponent({
 
  
 mounted: function () {
-  // Assuming your server is running locally on port 3000
-// Connect to the server
-// Define a type for the message
+  const urlSearchParams = new URLSearchParams(window.location.search);
+  const token = urlSearchParams.get('token');
+
+  if (token) {
+    // Store the token in localStorage
+    localStorage.setItem('token', token);
+    console.log('token :', token);
+  }
+
 type MessageType = string;
 
 // Connect to the server
