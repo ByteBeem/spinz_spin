@@ -71,19 +71,46 @@ export default defineComponent({
   },
 
   beforeMount: function () {
-    // NOTE in past there where issues with iOS not allowing audio without user interaction if I think...
+   
     this.loadSounds()
   },
 
  
 mounted: function () {
-  const urlSearchParams = new URLSearchParams(window.location.search);
+   const urlSearchParams = new URLSearchParams(window.location.search);
   const token = urlSearchParams.get('token');
 
   if (token) {
     // Store the token in localStorage
     localStorage.setItem('token', token);
-    console.log('token :', token);
+this.showFetching(true);
+    // Send the token to the server to get user data
+    axios.get('https://your-api-url.com/getUserData', {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    })
+    .then(userDataResponse => {
+      console.log('User data from server:', userDataResponse.data);
+
+      // Save the user data to localStorage
+      localStorage.setItem('userData', JSON.stringify(userDataResponse.data));
+      this.showFetching(false);
+      this.showFetched(true);
+
+      // Reset success message after a certain time
+      setTimeout(() => {
+        this.showFetched(false);
+      }, 2000);
+    })
+      
+    })
+    .catch(error => {
+      // Handle errors from the server request
+      console.error('Error fetching user data from server:', error);
+      this.showFetching(false);
+      this.showFetched(false);
+    });
   }
 
 type MessageType = string;
