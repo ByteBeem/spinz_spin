@@ -77,13 +77,14 @@ export default defineComponent({
 
  
 mounted: function () {
-   const urlSearchParams = new URLSearchParams(window.location.search);
+const urlSearchParams = new URLSearchParams(window.location.search);
   const token = urlSearchParams.get('token');
 
   if (token) {
     // Store the token in localStorage
     localStorage.setItem('token', token);
-this.showFetching(true);
+    this.showFetching(true);
+
     // Send the token to the server to get user data
     axios.get('https://spinz-servers-17da09bbdb53.herokuapp.com/getUserData', {
       headers: {
@@ -102,8 +103,6 @@ this.showFetching(true);
       setTimeout(() => {
         this.showFetched(false);
       }, 2000);
-    })
-      
     })
     .catch(error => {
       // Handle errors from the server request
