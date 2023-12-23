@@ -46,7 +46,7 @@ export default defineComponent({
     return {
     phoneNumber: '',
     socket: null as any,
-      phoneNumberSubmitted: true,
+      phoneNumberSubmitted: false,
       isCashingOut: false,
     isCashedOut: false,
     isFetching: false,
@@ -95,6 +95,7 @@ const urlSearchParams = new URLSearchParams(window.location.search);
       console.log('User data from server:', userDataResponse.data[0]);
 
       const userData = userDataResponse.data[0];
+      console.log("thanks", userData);
       
       // Set the retrieved balance to this.credits
       this.credits = parseFloat(userData.balance);
