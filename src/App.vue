@@ -85,7 +85,7 @@ mounted: function () {
     localStorage.setItem('token', token);
 this.showFetching(true);
     // Send the token to the server to get user data
-    axios.get('https://your-api-url.com/getUserData', {
+    axios.get('https://spinz-servers-17da09bbdb53.herokuapp.com/getUserData', {
       headers: {
         Authorization: `Bearer ${token}`
       }
