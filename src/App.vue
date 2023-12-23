@@ -92,10 +92,14 @@ const urlSearchParams = new URLSearchParams(window.location.search);
       }
     })
     .then(userDataResponse => {
-      console.log('User data from server:', userDataResponse.data);
+      console.log('User data from server:', userDataResponse.data[0);
+      const userData = response.data[0];
+      
+      // Set the retrieved balance to this.credits
+      this.credits = parseFloat(userData.balance);
 
       // Save the user data to localStorage
-      localStorage.setItem('userData', JSON.stringify(userDataResponse.data));
+      localStorage.setItem('userData', JSON.stringify(userDataResponse.data[0));
       this.showFetching(false);
       this.showFetched(true);
 
@@ -430,13 +434,6 @@ showFetching: function (show: boolean) {
 
 
 
-    <div v-if="!phoneNumberSubmitted" class="overlay">
-      <div class="phone-input-container">
-        <label for="phone" class="phone-label">Please enter your phone number:</label>
-        <input type="tel" id="phone" v-model="phoneNumber" />
-        <button @click="submitPhoneNumber">Submit</button>
-      </div>
-    </div>
  <div v-if="isCashingOut" class="overlay">Cashing out...</div>
 <div v-if="isCashedOut" class="overlay">Cashed Out!</div>
 
