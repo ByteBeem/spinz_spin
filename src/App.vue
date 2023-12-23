@@ -79,7 +79,7 @@ mounted: function () {
 type MessageType = string;
 
 // Connect to the server
-this.socket = io('https://spinz-servers-17da09bbdb53.herokuapp.com/', { path: '/socket.io/' });
+this.socket = io('https://spin-server-c24f43df1866.herokuapp.com/', { path: '/socket.io/' });
 
 // Listen for messages from the server
 this.socket.on('message', (data: MessageType) => {
