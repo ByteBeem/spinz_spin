@@ -487,12 +487,7 @@ showFetching: function (show: boolean) {
             v-on:clicked="spinAll()"
             v-bind:pressed="isSpinning"
           />
-           <StyledButton
-            :modLarge="true"
-            :text="SLOTBOT ? 'Run 🤖' : 'Cash Out'"
-            v-on:clicked="CashOut()"
-            v-bind:pressed="isSpinning"
-          />
+          
           <div class="meta">
             
          
