@@ -28,6 +28,10 @@ export type ReelRefs = {
 }
 
 export default defineComponent({
+   beforeUnmount: function () {
+    
+    localStorage.removeItem('token');
+  },
   name: 'SlotMachine',
   components: {
     SlotReel,
