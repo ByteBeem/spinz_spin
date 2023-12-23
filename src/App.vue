@@ -92,7 +92,8 @@ const urlSearchParams = new URLSearchParams(window.location.search);
       }
     })
     .then(userDataResponse => {
-      console.log('User data from server:', userDataResponse.data[0);
+      console.log('User data from server:', userDataResponse.data[0]);
+
       const userData = userDataResponse.data[0];
       
       // Set the retrieved balance to this.credits
