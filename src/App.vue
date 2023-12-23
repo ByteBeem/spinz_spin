@@ -101,7 +101,7 @@ const urlSearchParams = new URLSearchParams(window.location.search);
       this.credits = parseFloat(userData.balance);
 
       // Save the user data to localStorage
-      localStorage.setItem('userData', JSON.stringify(userDataResponse.data[0]);
+      localStorage.setItem('userData', JSON.stringify(userDataResponse.data[0]));
       this.showFetching(false);
       this.showFetched(true);
 
