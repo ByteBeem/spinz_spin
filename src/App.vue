@@ -46,7 +46,7 @@ export default defineComponent({
     return {
     phoneNumber: '',
     socket: null as any,
-      phoneNumberSubmitted: false,
+      phoneNumberSubmitted: true,
       isCashingOut: false,
     isCashedOut: false,
     isFetching: false,
