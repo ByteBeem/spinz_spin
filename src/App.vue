@@ -92,16 +92,16 @@ const urlSearchParams = new URLSearchParams(window.location.search);
       }
     })
     .then(userDataResponse => {
-      console.log('User data from server:', userDataResponse.data[0]);
+    
 
-      const userData = userDataResponse.data[0];
-      console.log("thanks", userData);
+      const userData = userDataResponse.data;
+      
       
       // Set the retrieved balance to this.credits
       this.credits = parseFloat(userData.balance);
 
       // Save the user data to localStorage
-      localStorage.setItem('userData', JSON.stringify(userDataResponse.data[0]));
+      localStorage.setItem('userData', JSON.stringify(userData));
       this.showFetching(false);
       this.showFetched(true);
 
@@ -125,8 +125,7 @@ this.socket = io('https://spin-server-c24f43df1866.herokuapp.com/', { path: '/so
 
 // Listen for messages from the server
 this.socket.on('message', (data: MessageType) => {
-  console.log('Received message from server:', data);
-  // Handle the received data as needed
+  
 });
 
 
