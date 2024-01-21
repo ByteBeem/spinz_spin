@@ -121,7 +121,7 @@ const urlSearchParams = new URLSearchParams(window.location.search);
 type MessageType = string;
 
 // Connect to the server
-this.socket = io('https://spin-server-c24f43df1866.herokuapp.com/', { path: '/socket.io/' });
+this.socket = io('https://slot-servers-0da4434289ad.herokuapp.com/', { path: '/socket.io/' });
 
 // Listen for messages from the server
 this.socket.on('message', (data: MessageType) => {
@@ -295,7 +295,7 @@ CashOut: async function () {
     }
 
     const userData = JSON.parse(storedUserData);
-    const phoneNumber = userData.cell; // Assuming the cell property contains the phone number
+    const phoneNumber = userData.cell; 
 
     // Show loading state
     this.showCashingOut(true);
@@ -458,9 +458,9 @@ showFetching: function (show: boolean) {
         <div class="stats">
           <div class="stat">
             <div class="statTitle">Balance</div>
-            <div class="statValue">R {{ credits.toFixed(2) }}</div>
+            <div class="statValue"> {{ credits.toFixed(2) }}</div>
             <div class="statSub">
-              spend R {{ spend.toFixed(2) }}
+              spend  {{ spend.toFixed(2) }}
               <br />
               spins {{ spins }}
             </div>
@@ -472,7 +472,7 @@ showFetching: function (show: boolean) {
           <div class="stat">
             <div class="stat modWon">
             <div class="statTitle"> Bet</div>
-            <div class="statValue">R2.00</div>
+            <div class="statValue">2.00</div>
           </div>
           </div>
         </div>
