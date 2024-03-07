@@ -86,7 +86,7 @@ const urlSearchParams = new URLSearchParams(window.location.search);
     this.showFetching(true);
 
     // Send the token to the server to get user data
-    axios.get('https://spinz-server-100d0276d968.herokuapp.com/getUserData', {
+    axios.get('https://spinzserver-e34cd148765a.herokuapp.com/getUserData', {
       headers: {
         Authorization: `Bearer ${token}`
       }
