@@ -27,6 +27,13 @@ export type ReelRefs = {
   reel3: InstanceType<typeof SlotReel>
 }
 
+interface SpinResultData {
+  success: boolean;
+  reelSymbols: ReelSymbol[];
+  isWin: boolean;
+  message?: string; 
+}
+
 export default defineComponent({
    beforeUnmount: function () {
     
@@ -213,6 +220,9 @@ this.socket.on('message', (data: MessageType) => {
     });
 },
 
+
+
+
     spinAll: function () {
     this.takeWin();
 
@@ -249,16 +259,15 @@ this.socket.on('message', (data: MessageType) => {
       // Emit 'spin' event to the server with token
       this.socket.emit('spin', { token: storedToken });
 
-      // Handle server response
-      this.socket.once('spinResult', (data) => {
-        this.isSpinning = false; // Stop spinning
+     this.socket.once('spinResult', (data: SpinResultData) => {
+        this.isSpinning = false; 
 
         if (data.success) {
           this.resultData = data.reelSymbols;
           if (data.isWin) {
             this.playSound(Sounds.win);
           } else {
-            this.playSound(Sounds.lose);
+            
           }
           // Update user credits based on result
           this.credits = this.credits + this.win - this.spend;
