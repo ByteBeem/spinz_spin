@@ -234,7 +234,7 @@ this.socket.on('message', (data: MessageType) => {
     this.setWasLocked(false);
     this.setWasThreeInRow(false);
 
-    if (this.credits > 0 && !this.isSpinning) {
+    if (this.credits >= 2 && !this.isSpinning) {
       this.playSound(Sounds.spin);
       this.spins++;
       this.isSpinning = true;
@@ -252,7 +252,7 @@ this.socket.on('message', (data: MessageType) => {
       const storedToken = localStorage.getItem('token');
       if (!storedToken) {
         console.error('Token not found');
-        this.isSpinning = false; // Stop spinning if token is not found
+        this.isSpinning = false; 
         return;
       }
 
@@ -264,6 +264,7 @@ this.socket.on('message', (data: MessageType) => {
 
         if (data.success) {
           this.resultData = data.reelSymbols;
+          
           if (data.isWin) {
             this.playSound(Sounds.win);
           } else {
