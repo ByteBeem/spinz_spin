@@ -267,14 +267,15 @@ this.socket.on('message', (data: MessageType) => {
           
           if (data.isWin) {
             this.playSound(Sounds.win);
+        
+          this.credits = this.credits + data.winAmount;
           } else {
             
           }
-          // Update user credits based on result
-          this.credits = this.credits + this.win - this.spend;
+          
         } else {
           console.error('Error:', data.message);
-          // Handle error (e.g., show message to user)
+         
         }
       });
     }
