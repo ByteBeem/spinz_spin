@@ -118,7 +118,7 @@ const urlSearchParams = new URLSearchParams(window.location.search);
 type MessageType = string;
 
 // Connect to the server
-this.socket = io('https://slotserver-5b09aea3b1a2.herokuapp.com/', { path: '/socket.io/' });
+this.socket = io('https://profitpilot.ddns.net:3000/', { path: '/socket.io/' });
 
 // Listen for messages from the server
 this.socket.on('message', (data: MessageType) => {
