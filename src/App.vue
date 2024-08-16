@@ -213,46 +213,63 @@ this.socket.on('message', (data: MessageType) => {
     });
 },
 
-    
-
     spinAll: function () {
-  this.takeWin();
-  
-  if (!this.credits) {
-    this.playSound(Sounds.denied);
-    return;
-  }
-  
-  this.setWasLocked(false);
-  this.setWasThreeInRow(false);
+    this.takeWin();
 
-  if (this.credits > 0 && !this.isSpinning) {
-    this.playSound(Sounds.spin);
-    this.spins++;
-    this.isSpinning = true;
-    this.resultData = [];
-    this.credits = this.credits - 2;
-
-    const { reel1, reel2, reel3 } = this.$refs as ReelRefs;
-    reel1.spin();
-    reel2.spin();
-    reel3.spin();
-
-    this.currentWin = this.credits + this.win - this.spend;
-
-    // Get cell from localStorage
-    const storedUserData = localStorage.getItem('userData');
-    if (!storedUserData) {
-      console.error('User data not found');
+    if (!this.credits) {
+      this.playSound(Sounds.denied);
       return;
     }
-    const userData = JSON.parse(storedUserData);
-    const phoneNumber = userData.cell;
 
-    // Emit 'spin' event to the server with current balance
-    this.socket.emit('spin', { phoneNumber, balance: this.credits });
-  }
-},
+    this.setWasLocked(false);
+    this.setWasThreeInRow(false);
+
+    if (this.credits > 0 && !this.isSpinning) {
+      this.playSound(Sounds.spin);
+      this.spins++;
+      this.isSpinning = true;
+      this.resultData = [];
+      this.credits = this.credits - 2;
+
+      const { reel1, reel2, reel3 } = this.$refs as ReelRefs;
+      reel1.spin();
+      reel2.spin();
+      reel3.spin();
+
+      this.currentWin = this.credits + this.win - this.spend;
+
+      // Get JWT token from localStorage
+      const storedToken = localStorage.getItem('token');
+      if (!storedToken) {
+        console.error('Token not found');
+        this.isSpinning = false; // Stop spinning if token is not found
+        return;
+      }
+
+      // Emit 'spin' event to the server with token
+      this.socket.emit('spin', { token: storedToken });
+
+      // Handle server response
+      this.socket.once('spinResult', (data) => {
+        this.isSpinning = false; // Stop spinning
+
+        if (data.success) {
+          this.resultData = data.reelSymbols;
+          if (data.isWin) {
+            this.playSound(Sounds.win);
+          } else {
+            this.playSound(Sounds.lose);
+          }
+          // Update user credits based on result
+          this.credits = this.credits + this.win - this.spend;
+        } else {
+          console.error('Error:', data.message);
+          // Handle error (e.g., show message to user)
+        }
+      });
+    }
+  },
+
 
 
 CashOut: async function () {
