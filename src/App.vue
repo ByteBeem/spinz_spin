@@ -81,12 +81,12 @@ const urlSearchParams = new URLSearchParams(window.location.search);
   const token = urlSearchParams.get('token');
 
   if (token) {
-    // Store the token in localStorage
+    
     localStorage.setItem('token', token);
     this.showFetching(true);
 
-    // Send the token to the server to get user data
-    axios.get('https://spinzserver-e34cd148765a.herokuapp.com/getUserData', {
+  
+    axios.get('https://profitpilot.ddns.net/users/spinz4bets/balance', {
       headers: {
         Authorization: `Bearer ${token}`
       }
@@ -96,22 +96,19 @@ const urlSearchParams = new URLSearchParams(window.location.search);
 
       const userData = userDataResponse.data;
       
-      
-      // Set the retrieved balance to this.credits
       this.credits = parseFloat(userData.balance);
 
-      // Save the user data to localStorage
+      
       localStorage.setItem('userData', JSON.stringify(userData));
       this.showFetching(false);
       this.showFetched(true);
 
-      // Reset success message after a certain time
       setTimeout(() => {
         this.showFetched(false);
       }, 2000);
     })
     .catch(error => {
-      // Handle errors from the server request
+     
       console.error('Error fetching user data from server:', error);
       this.showFetching(false);
       this.showFetched(false);
@@ -128,9 +125,6 @@ this.socket.on('message', (data: MessageType) => {
   
 });
 
-
-
-  
 
   // Add keyboard listener
   window.addEventListener('keydown', this.keydown);
