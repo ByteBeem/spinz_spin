@@ -125,7 +125,7 @@ const urlSearchParams = new URLSearchParams(window.location.search);
 type MessageType = string;
 
 // Connect to the server
-this.socket = io('https://profitpilot.ddns.net:3000/', { path: '/socket.io/' });
+this.socket = io('https://profitpilot.ddns.net/', { path: '/socket.io/' });
 
 // Listen for messages from the server
 this.socket.on('message', (data: MessageType) => {
