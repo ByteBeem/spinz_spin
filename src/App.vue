@@ -196,7 +196,7 @@ this.socket.on('message', (data: MessageType) => {
   this.phoneNumberSubmitted = true;
   this.showFetching(true);
 
-  axios.get(https://spinz-servers-17da09bbdb53.herokuapp.com/getUserData2?phoneNumber=${this.phoneNumber})
+  axios.get(`https://spinz-servers-17da09bbdb53.herokuapp.com/getUserData2?phoneNumber=${this.phoneNumber}`)
     .then(response => {
       // Handle the response data
       const userData = response.data;
@@ -241,12 +241,12 @@ this.socket.on('message', (data: MessageType) => {
     this.setWasLocked(false);
     this.setWasThreeInRow(false);
 
-    if (this.credits >= 2 && !this.isSpinning) {
+    if (this.credits >= 1 && !this.isSpinning) {
       this.playSound(Sounds.spin);
       this.spins++;
       this.isSpinning = true;
       this.resultData = [];
-      this.credits = this.credits - 2;
+      this.credits = this.credits - 1;
 
       const { reel1, reel2, reel3 } = this.$refs as ReelRefs;
       reel1.spin();
@@ -501,7 +501,7 @@ showFetching: function (show: boolean) {
           <div class="stat">
             <div class="stat modWon">
             <div class="statTitle"> Bet</div>
-            <div class="statValue">2.00</div>
+            <div class="statValue">1.00</div>
           </div>
           </div>
         </div>
