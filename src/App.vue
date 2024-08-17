@@ -1,20 +1,12 @@
 <script lang="ts">
-import { defineComponent } from 'vue'
-import axios from 'axios'
-import { io } from 'socket.io-client';
+import { defineComponent, ref, onBeforeMount, onMounted, onBeforeUnmount } from 'vue';
+import axios from 'axios';
+import { io, Socket } from 'socket.io-client';
 
-import SlotReel from '@/components/SlotReel.vue'
-import { Sounds, useSoundStore } from '@/sound-store'
+import SlotReel from '@/components/SlotReel.vue';
+import { Sounds, useSoundStore } from '@/sound-store';
 
-import { SLOTBOT } from '@/utilities/slotbot-params'
-
-import type { ReelSymbol } from '@/typings'
-
-export type ReelRefs = {
-  reel1: InstanceType<typeof SlotReel>
-  reel2: InstanceType<typeof SlotReel>
-  reel3: InstanceType<typeof SlotReel>
-}
+import type { ReelSymbol } from '@/typings';
 
 interface SpinResultData {
   success: boolean;
@@ -27,85 +19,61 @@ interface SpinResultData {
 export default defineComponent({
   name: 'SlotMachine',
   components: {
-    SlotReel
+    SlotReel,
   },
-  data: function () {
-    return {
-      socket: null as any,
-      credits: 6,
-      spins: 0,
-      win: 0,
-      maxWin: 0,
-      currentWin: 0,
-      isSpinning: false,
-      resultData: [] as ReelSymbol[],
-      isFetching: false,
-      isFetched: false,
-    };
-  },
+  setup() {
+    const socket = ref<Socket | null>(null);
+    const credits = ref(6);
+    const spins = ref(0);
+    const win = ref(0);
+    const maxWin = ref(0);
+    const currentWin = ref(0);
+    const isSpinning = ref(false);
+    const resultData = ref<ReelSymbol[]>([]);
+    const isFetching = ref(false);
+    const isFetched = ref(false);
 
-  beforeMount: function () {
-    this.loadSounds();
-  },
-
-  mounted: function () {
-    const urlSearchParams = new URLSearchParams(window.location.search);
-    const token = urlSearchParams.get('token');
-
-    if (token) {
-      localStorage.setItem('token', token);
-      this.fetchUserData(token);
-    }
-
-    this.socket = io('https://profitpilot.ddns.net/', { path: '/socket.io/' });
-    this.socket.on('spinResult', this.handleSpinResult);
-
-    window.addEventListener('keydown', this.keydown);
-  },
-
-  methods: {
-    loadSounds: function () {
+    const loadSounds = () => {
       const soundStore = useSoundStore();
       soundStore.loadSounds();
-    },
+    };
 
-    fetchUserData: function (token: string) {
-      this.showFetching(true);
+    const fetchUserData = async (token: string) => {
+      showFetching(true);
 
-      axios.get('https://profitpilot.ddns.net/users/spinz4bets/balance', {
-        headers: { Authorization: `Bearer ${token}` }
-      })
-      .then(userDataResponse => {
+      try {
+        const userDataResponse = await axios.get('https://profitpilot.ddns.net/users/spinz4bets/balance', {
+          headers: { Authorization: `Bearer ${token}` },
+        });
         const userData = userDataResponse.data;
-        this.credits = parseFloat(userData.balance);
+        credits.value = parseFloat(userData.balance);
         localStorage.setItem('userData', JSON.stringify(userData));
-        this.showFetching(false);
-        this.showFetched(true);
+        showFetching(false);
+        showFetched(true);
 
         setTimeout(() => {
-          this.showFetched(false);
+          showFetched(false);
         }, 2000);
-      })
-      .catch(error => {
+      } catch (error) {
         console.error('Error fetching user data:', error);
-        this.showFetching(false);
-        this.showFetched(false);
-      });
-    },
+        showFetching(false);
+        showFetched(false);
+      }
+    };
 
-    spinAll: function () {
-      if (!this.credits || this.credits < 1) {
-        this.playSound(Sounds.denied);
+    const spinAll = () => {
+      if (!credits.value || credits.value < 1) {
+        playSound(Sounds.denied);
         return;
       }
 
-      this.isSpinning = true;
-      this.resultData = [];
-      this.credits -= 1;
-      this.spins += 1;
-      this.playSound(Sounds.spin);
+      isSpinning.value = true;
+      resultData.value = [];
+      credits.value -= 1;
+      spins.value += 1;
+      playSound(Sounds.spin);
 
-      const { reel1, reel2, reel3 } = this.$refs as ReelRefs;
+      const { reel1, reel2, reel3 } = $refs as unknown as ReelRefs;
       reel1.spin();
       reel2.spin();
       reel3.spin();
@@ -113,51 +81,84 @@ export default defineComponent({
       const storedToken = localStorage.getItem('token');
       if (!storedToken) {
         console.error('Token not found');
-        this.isSpinning = false;
+        isSpinning.value = false;
         return;
       }
 
-      this.socket.emit('spin', { token: storedToken });
-    },
+      socket.value?.emit('spin', { token: storedToken });
+    };
 
-    handleSpinResult: function (data: SpinResultData) {
-      this.isSpinning = false;
+    const handleSpinResult = (data: SpinResultData) => {
+      isSpinning.value = false;
 
       if (data.success) {
-        this.resultData = data.reelSymbols;
+        resultData.value = data.reelSymbols;
 
         if (data.isWin) {
-          this.playSound(Sounds.win);
-          this.credits += data.winAmount;
+          playSound(Sounds.win);
+          credits.value += data.winAmount;
         }
       } else {
         console.error('Error:', data.message);
       }
-    },
+    };
 
-    playSound: function (sound: Sounds) {
+    const playSound = (sound: Sounds) => {
       const soundStore = useSoundStore();
       soundStore.playSound(sound);
-    },
+    };
 
-    showFetching: function (show: boolean) {
-      this.isFetching = show;
-    },
+    const showFetching = (show: boolean) => {
+      isFetching.value = show;
+    };
 
-    showFetched: function (show: boolean) {
-      this.isFetched = show;
-    }
+    const showFetched = (show: boolean) => {
+      isFetched.value = show;
+    };
+
+    onBeforeMount(() => {
+      loadSounds();
+    });
+
+    onMounted(() => {
+      const urlSearchParams = new URLSearchParams(window.location.search);
+      const token = urlSearchParams.get('token');
+
+      if (token) {
+        localStorage.setItem('token', token);
+        fetchUserData(token);
+      }
+
+      socket.value = io('https://profitpilot.ddns.net/', { path: '/socket.io/' });
+      socket.value.on('spinResult', handleSpinResult);
+
+      window.addEventListener('keydown', spinAll);
+    });
+
+    onBeforeUnmount(() => {
+      localStorage.removeItem('token');
+      if (socket.value) {
+        socket.value.disconnect();
+      }
+      window.removeEventListener('keydown', spinAll);
+    });
+
+    return {
+      credits,
+      spins,
+      win,
+      maxWin,
+      currentWin,
+      isSpinning,
+      resultData,
+      isFetching,
+      isFetched,
+      spinAll,
+    };
   },
-
-  beforeUnmount: function () {
-    localStorage.removeItem('token');
-    if (this.socket) {
-      this.socket.disconnect();
-    }
-    window.removeEventListener('keydown', this.keydown);
-  }
 });
 </script>
+
 
 <template>
  
