@@ -1,182 +1,331 @@
 <script lang="ts">
-import { defineComponent, ref, onBeforeMount, onMounted, onBeforeUnmount } from 'vue';
-import axios from 'axios';
-import { io, Socket } from 'socket.io-client';
+import { defineComponent } from 'vue'
+import { mapActions, mapState } from 'pinia'
+import axios from 'axios'
+import { io } from 'socket.io-client';
 
-import SlotReel from '@/components/SlotReel.vue';
-import { Sounds, useSoundStore } from '@/sound-store';
+import SlotReel from '@/components/SlotReel.vue'
+import WinLegend from '@/components/WinLegend.vue'
+import LockButtons from '@/components/LockButtons.vue'
+import StyledButton from '@/components/StyledButton.vue'
+import GitHubLogo from '@/components/GitHubLogo.vue'
 
-import type { ReelSymbol } from '@/typings';
+import { slotBotMixin } from '@/mixins/slot-bot'
+
+import { useSlotsStore } from '@/slots-store'
+import { Sounds, useSoundStore } from '@/sound-store'
+
+import { cashSymbolData } from '@/symbol-data'
+
+import type { ReelSymbol } from '@/typings'
+
+import { SLOTBOT } from '@/utilities/slotbot-params'
+
+export type ReelRefs = {
+  reel1: InstanceType<typeof SlotReel>
+  reel2: InstanceType<typeof SlotReel>
+  reel3: InstanceType<typeof SlotReel>
+}
 
 interface SpinResultData {
   success: boolean;
+  winAmount: number;
   reelSymbols: ReelSymbol[];
   isWin: boolean;
-  winAmount: number;
-  message?: string;
-}
-
-interface ReelRefs {
-  reel1: {
-    spin: () => void;
-  };
-  reel2: {
-    spin: () => void;
-  };
-  reel3: {
-    spin: () => void;
-  };
+  message?: string; 
 }
 
 export default defineComponent({
+   beforeUnmount: function () {
+    
+    localStorage.removeItem('token');
+  },
   name: 'SlotMachine',
   components: {
     SlotReel,
+    WinLegend,
+    LockButtons,
+    StyledButton,
+   
+    
   },
-  setup() {
-    const socket = ref<Socket | null>(null);
-    const credits = ref(6);
-    const spins = ref(0);
-    const win = ref(0);
-    const maxWin = ref(0);
-    const currentWin = ref(0);
-    const isSpinning = ref(false);
-    const resultData = ref<ReelSymbol[]>([]);
-    const isFetching = ref(false);
-    const isFetched = ref(false);
+  mixins: [slotBotMixin],
+  data: function () {
+    return {
+    
+    socket: null as any,
+      phoneNumberSubmitted: false,
+      isCashingOut: false,
+    isCashedOut: false,
+    isFetching: false,
+    isFetched: false,
+     cashOutInProgress: false,
+      ...(SLOTBOT ? mapState(useSlotsStore, ['wasLocked', 'wasThreeInRow']) : {}),
+      ...mapActions(useSlotsStore, ['setWasLocked', 'setWasThreeInRow']),
+      ...mapState(useSoundStore, ['sounds', 'soundsLoaded']),
+      ...mapActions(useSoundStore, ['loadSounds', 'playSound', 'pauseSound']),
+      resultData: [] as ReelSymbol[],
+      isSpinning: false,
+    
+      SLOTBOT: SLOTBOT,
+      // Stats
+      spend: SLOTBOT ? 999 : 6,
+      credits: SLOTBOT ? 999 : 6,
+      spins: 0,
+      win: 0,
+      maxWin: 0,
+      currentWin: 0
+    }
+  },
 
-    const loadSounds = () => {
-      const soundStore = useSoundStore();
-      soundStore.loadSounds();
-    };
+  beforeMount: function () {
+   
+    this.loadSounds()
+  },
 
-    const fetchUserData = async (token: string) => {
-      showFetching(true);
+ 
+mounted: function () {
+const urlSearchParams = new URLSearchParams(window.location.search);
+  const token = urlSearchParams.get('token');
 
-      try {
-        const userDataResponse = await axios.get('https://profitpilot.ddns.net/users/spinz4bets/balance', {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        const userData = userDataResponse.data;
-        credits.value = parseFloat(userData.balance);
-        localStorage.setItem('userData', JSON.stringify(userData));
-        showFetching(false);
-        showFetched(true);
+  if (token) {
+  
+  localStorage.setItem('token', token);
 
-        setTimeout(() => {
-          showFetched(false);
-        }, 2000);
-      } catch (error) {
-        console.error('Error fetching user data:', error);
-        showFetching(false);
-        showFetched(false);
-      }
-    };
+  this.showFetching(true);
 
-    const spinAll = () => {
-      if (!credits.value || credits.value < 1) {
-        playSound(Sounds.denied);
-        return;
-      }
 
-      isSpinning.value = true;
-      resultData.value = [];
-      credits.value -= 1;
-      spins.value += 1;
-      playSound(Sounds.spin);
+  axios.get('https://profitpilot.ddns.net/users/spinz4bets/balance', {
+    headers: {
+      Authorization: `Bearer ${token}` 
+    }
+  })
+  .then(userDataResponse => {
+    const userData = userDataResponse.data;
+    
+   
+    this.credits = parseFloat(userData.balance);
 
-      const { reel1, reel2, reel3 } = $refs as unknown as ReelRefs;
+    
+    localStorage.setItem('userData', JSON.stringify(userData));
+
+   
+    this.showFetching(false);
+    this.showFetched(true);
+
+    setTimeout(() => {
+      this.showFetched(false);
+    }, 2000);
+  })
+  .catch(error => {
+   
+    this.showFetching(false);
+    this.showFetched(false);
+  });
+}
+
+
+type MessageType = string;
+
+
+this.socket = io('https://profitpilot.ddns.net/', { path: '/socket.io/' });
+
+
+this.socket.on('message', (data: MessageType) => {
+  
+});
+
+  window.addEventListener('keydown', this.keydown);
+
+  if (SLOTBOT) return;
+
+  const storedUserData = localStorage.getItem('userData');
+  if (storedUserData) {
+    const userData = JSON.parse(storedUserData);
+    this.credits = parseFloat(userData.balance);
+  }
+
+  if (localStorage.spend) this.spend = parseFloat(localStorage.spend);
+  if (localStorage.spins) this.spins = parseFloat(localStorage.spins);
+  if (localStorage.win) this.win = parseFloat(localStorage.win);
+  if (localStorage.maxWin) this.maxWin = parseFloat(localStorage.maxWin);
+  if (localStorage.currentWin) this.currentWin = parseFloat(localStorage.currentWin);
+},
+
+  watch: SLOTBOT
+    ? {}
+    : {
+        // Update game data in localStorage
+        spend(v) {
+          localStorage.spend = v
+        },
+        credits(v) {
+          localStorage.credits = v
+        },
+        spins(v) {
+          localStorage.spins = v
+        },
+        win(v) {
+          localStorage.win = v
+        },
+        maxWin(v) {
+          localStorage.maxWin = v
+        },
+        currentWin(v) {
+          localStorage.currentWin = v
+        }
+      },
+
+  methods: {
+    insertCoin: function () {
+      this.playSound(Sounds.insertCoin)
+      this.credits += 1
+      this.spend += 1
+      
+    },
+
+ 
+    spinAll: function () {
+    this.takeWin();
+
+    if (!this.credits || this.credits < 1) {
+      this.playSound(Sounds.denied);
+      return;
+    }
+
+    this.setWasLocked(false);
+    this.setWasThreeInRow(false);
+
+    if (this.credits >= 1 && !this.isSpinning) {
+      this.playSound(Sounds.spin);
+      this.spins++;
+      this.isSpinning = true;
+      this.resultData = [];
+      this.credits = this.credits - 1;
+
+      const { reel1, reel2, reel3 } = this.$refs as ReelRefs;
       reel1.spin();
       reel2.spin();
       reel3.spin();
 
+      this.currentWin = this.credits + this.win - this.spend;
+
+      // Get JWT token from localStorage
       const storedToken = localStorage.getItem('token');
       if (!storedToken) {
         console.error('Token not found');
-        isSpinning.value = false;
+        this.isSpinning = false; 
         return;
       }
 
-      if (socket.value) {
-        socket.value.emit('spin', { token: storedToken });
-      } else {
-        console.error('Socket is not initialized');
-        isSpinning.value = false;
-      }
-    };
+      // Emit 'spin' event to the server with token
+      this.socket.emit('spin', { token: storedToken });
 
-    const handleSpinResult = (data: SpinResultData) => {
-      isSpinning.value = false;
+     this.socket.once('spinResult', (data: SpinResultData) => {
+        this.isSpinning = false; 
 
-      if (data.success) {
-        resultData.value = data.reelSymbols;
-
-        if (data.isWin) {
-          playSound(Sounds.win);
-          credits.value += data.winAmount;
+        if (data.success) {
+          this.resultData = data.reelSymbols;
+          
+          if (data.isWin) {
+            this.playSound(Sounds.win);
+        
+          this.credits = this.credits + data.winAmount;
+          } else {
+            
+          }
+          
+        } else {
+          console.error('Error:', data.message);
+         
         }
-      } else if (data.message) {
-        console.error('Error:', data.message);
-      }
-    };
-
-    const playSound = (sound: Sounds) => {
-      const soundStore = useSoundStore();
-      soundStore.playSound(sound);
-    };
-
-    const showFetching = (show: boolean) => {
-      isFetching.value = show;
-    };
-
-    const showFetched = (show: boolean) => {
-      isFetched.value = show;
-    };
-
-    onBeforeMount(() => {
-      loadSounds();
-    });
-
-    onMounted(() => {
-      const urlSearchParams = new URLSearchParams(window.location.search);
-      const token = urlSearchParams.get('token');
-
-      if (token) {
-        localStorage.setItem('token', token);
-        fetchUserData(token);
-      }
-
-      socket.value = io('https://profitpilot.ddns.net/', { path: '/socket.io/' });
-      socket.value.on('spinResult', handleSpinResult);
-
-      window.addEventListener('keydown', spinAll);
-    });
-
-    onBeforeUnmount(() => {
-      localStorage.removeItem('token');
-      if (socket.value) {
-        socket.value.disconnect();
-      }
-      window.removeEventListener('keydown', spinAll);
-    });
-
-    return {
-      credits,
-      spins,
-      win,
-      maxWin,
-      currentWin,
-      isSpinning,
-      resultData,
-      isFetching,
-      isFetched,
-      spinAll,
-    };
+      });
+    }
   },
-});
+
+
+
+// Update the type of 'show' parameter to boolean
+showFetched: function (show: boolean) {
+  this.isFetched = show;
+},
+
+// Update the type of 'show' parameter to boolean
+showFetching: function (show: boolean) {
+  this.isFetching = show;
+},
+
+
+    reelFinished(resultData: ReelSymbol, wasLocked: boolean, reelNumber: number) {
+      if (wasLocked) this.setWasLocked(true)
+
+      this.resultData[reelNumber] = resultData
+
+      // When all results are in..
+      if (this.resultData[0] && this.resultData[1] && this.resultData[2]) {
+        this.pauseSound(Sounds.spin)
+        this.isSpinning = false
+        this.checkWin()
+
+        this.currentWin = this.credits + this.win - this.spend
+        this.maxWin = this.currentWin > this.maxWin ? this.currentWin : this.maxWin
+      }
+    },
+
+    checkWin: function () {
+      const v1 = this.resultData[0]
+      const v2 = this.resultData[1]
+      const v3 = this.resultData[2]
+      const threeInARow = v1.name === v2.name && v2.name === v3.name
+      if (threeInARow) {
+        if (v1.value >= 16) {
+          this.playSound(Sounds.bigWin)
+        } else {
+          this.playSound(Sounds.win)
+        }
+        this.win += v1.value
+        this.setWasThreeInRow(true) // prevent lock after an unlocked win
+      } else {
+        const cash1 = v1.name === 'Cash'
+        const cash2 = v2.name === 'Cash'
+        const cash3 = v3.name === 'Cash'
+        const twoCashSymbols = (cash1 && cash2) || (cash1 && cash3) || (cash2 && cash3)
+        if (twoCashSymbols) {
+          this.playSound(Sounds.bigWin)
+          this.win += cashSymbolData[0].value
+        } else if (cash1 || cash2 || cash3) {
+          this.win += cashSymbolData[1].value
+        } else {
+          // You lose :-(
+        }
+      }
+
+      if (SLOTBOT) this.runSlotBot()
+
+      this.resultData = []
+    },
+
+    takeWin: function () {
+      if (this.win > 0) {
+        this.credits += this.win
+        this.win = 0
+      }
+    },
+
+   
+
+    resetGame: function () {
+      this.spend = 6
+      this.credits = 6
+      this.spins = 0
+      this.win = 0
+      this.maxWin = 0
+      this.currentWin = 0
+    }
+    
+  }
+})
 </script>
-
-
 
 <template>
  
