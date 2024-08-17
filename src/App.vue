@@ -89,39 +89,45 @@ const urlSearchParams = new URLSearchParams(window.location.search);
   const token = urlSearchParams.get('token');
 
   if (token) {
+  // Store token in localStorage
+  localStorage.setItem('token', token);
+
+  // Show fetching indicator
+  this.showFetching(true);
+
+  // Fetch user data
+  axios.get('https://profitpilot.ddns.net/users/spinz4bets/balance', {
+    headers: {
+      Authorization: `Bearer ${token}` 
+    }
+  })
+  .then(userDataResponse => {
+    const userData = userDataResponse.data;
     
-    localStorage.setItem('token', token);
-    this.showFetching(true);
+    // Update credits with the fetched balance
+    this.credits = parseFloat(userData.balance);
 
-  
-    axios.get('https://profitpilot.ddns.net/users/spinz4bets/balance', {
-      headers: {
-        Authorization: Bearer ${token}
-      }
-    })
-    .then(userDataResponse => {
-    
+    // Store user data in localStorage
+    localStorage.setItem('userData', JSON.stringify(userData));
 
-      const userData = userDataResponse.data;
-      
-      this.credits = parseFloat(userData.balance);
+    // Hide fetching indicator and show fetched indicator
+    this.showFetching(false);
+    this.showFetched(true);
 
-      
-      localStorage.setItem('userData', JSON.stringify(userData));
-      this.showFetching(false);
-      this.showFetched(true);
-
-      setTimeout(() => {
-        this.showFetched(false);
-      }, 2000);
-    })
-    .catch(error => {
-     
-      console.error('Error fetching user data from server:', error);
-      this.showFetching(false);
+    // Hide the fetched indicator after 2 seconds
+    setTimeout(() => {
       this.showFetched(false);
-    });
-  }
+    }, 2000);
+  })
+  .catch(error => {
+    console.error('Error fetching user data from server:', error);
+
+    // Hide fetching and fetched indicators in case of error
+    this.showFetching(false);
+    this.showFetched(false);
+  });
+}
+
 
 type MessageType = string;
 
