@@ -16,6 +16,18 @@ interface SpinResultData {
   message?: string;
 }
 
+interface ReelRefs {
+  reel1: {
+    spin: () => void;
+  };
+  reel2: {
+    spin: () => void;
+  };
+  reel3: {
+    spin: () => void;
+  };
+}
+
 export default defineComponent({
   name: 'SlotMachine',
   components: {
@@ -85,7 +97,12 @@ export default defineComponent({
         return;
       }
 
-      socket.value?.emit('spin', { token: storedToken });
+      if (socket.value) {
+        socket.value.emit('spin', { token: storedToken });
+      } else {
+        console.error('Socket is not initialized');
+        isSpinning.value = false;
+      }
     };
 
     const handleSpinResult = (data: SpinResultData) => {
@@ -98,7 +115,7 @@ export default defineComponent({
           playSound(Sounds.win);
           credits.value += data.winAmount;
         }
-      } else {
+      } else if (data.message) {
         console.error('Error:', data.message);
       }
     };
@@ -158,6 +175,7 @@ export default defineComponent({
   },
 });
 </script>
+
 
 
 <template>
