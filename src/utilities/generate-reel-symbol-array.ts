@@ -8,7 +8,7 @@ import { symbolData } from '../symbol-data';
  */
 const shuffleArray = (array: ReelSymbol[]): ReelSymbol[] => {
   const clonedArray = [...array]; // Clone the array
-  for (let i = array.length - 1; i > 0; i--) {
+  for (let i = clonedArray.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     // Swap elements randomly to enhance unpredictability
     const temp = clonedArray[i];
@@ -21,10 +21,14 @@ const shuffleArray = (array: ReelSymbol[]): ReelSymbol[] => {
 /**
  * Checks if the array has consecutive matching symbols.
  * @param array - Array to be checked.
- * @returns Always returns false to ensure no consecutive matching symbols.
+ * @returns True if consecutive symbols match, false otherwise.
  */
 const hasConsecutiveMatches = (array: ReelSymbol[]): boolean => {
-  // Always return false to ensure no consecutive matches
+  for (let i = 0; i < array.length - 1; i++) {
+    if (array[i].name === array[i + 1].name) {
+      return true; // Consecutive matching symbols found
+    }
+  }
   return false;
 };
 
@@ -80,7 +84,7 @@ export const generateReelSymbolArray = (): ReelSymbol[] => {
 
     // If consecutive matches or higher-value followed by lower-value are found, reshuffle
     if (!hasConsecutiveMatches(shuffledArray) && !hasHigherValueFollowedByLower(shuffledArray)) {
-      break;
+      break; // Valid array found
     }
   }
 

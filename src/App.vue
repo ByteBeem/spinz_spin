@@ -230,7 +230,7 @@ this.socket.on('message', (data: MessageType) => {
           if (data.isWin) {
             this.playSound(Sounds.win);
         
-          this.credits = this.credits + data.winAmount;
+          this.win = data.winAmount;
           } else {
             
           }
