@@ -29,7 +29,7 @@ export type ReelRefs = {
 
 interface SpinResultData {
   success: boolean;
-  winAmount: double;
+  winAmount: number;
   reelSymbols: ReelSymbol[];
   isWin: boolean;
   message?: string; 
