@@ -63,7 +63,7 @@ export const generateReelSymbolArray = (): ReelSymbol[] => {
       occurrenceCount = 1;
     } else {
       // Increase the occurrence count for higher-value symbols to make them rarer
-      occurrenceCount = i * 15; // Increase this multiplier to amplify their rarity
+      occurrenceCount = i * 5; // Increase this multiplier to amplify their rarity
     }
 
     // Uncomment the following line if you want to override count for a specific symbol
